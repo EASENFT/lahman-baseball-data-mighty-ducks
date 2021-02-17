@@ -116,10 +116,27 @@ WITH wsw AS (SELECT DISTINCT(yearid) as year,
 			FROM teams
 			WHERE wswin = 'Y'
 			AND yearid >= 1970
-			GROUP BY yearid, wswin, name, w)
-SELECT DISTINCT(teams.yearid), 
-	CASE WHEN wsw.wins = (MAX(teams.w) OVER(PARTITION BY teams.yearid)) THEN wsw.name END as wswinner,
-	teams.w as n_wins
-FROM teams LEFT JOIN wsw ON wsw.year = teams.yearid
-WHERE teams.yearid >= 1970
-GROUP BY teams.yearid, wsw.name, teams.yearid, wsw.wins, teams.w;
+			GROUP BY yearid, wswin, name, w),
+ranks AS (SELECT RANK () OVER (PARTITION BY yearid ORDER BY w desc) as wrank,
+		name,
+		w,
+	    yearid
+	  	FROM teams
+	  WHERE yearid >= 1970),
+maxers AS (SELECT yearid,
+		   name, 
+		   wrank, 
+		   ranks.w as wins
+		   FROM ranks
+		   WHERE wrank = 1),
+totals as (SELECT DISTINCT(wsw.year),
+			maxers.name as max_winner,
+			maxers.wins as max_wins,
+			wsw.name as wswinner,
+			wsw.wins as wswinner_wins
+		FROM wsw INNER JOIN maxers ON wsw.year = maxers.yearid)
+SELECT totals.year,
+	totals.wswinner,
+	wswinner_wins
+FROM totals
+WHERE totals.max_winner = totals.wswinner;
