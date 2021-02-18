@@ -3,7 +3,7 @@ SELECT *
 FROM teams
 LIMIT 10;
 
---Select non-world series winners, order by descending wins.
+--Non-world series winner with the most wins.
 SELECT yearid,
 	name, 	
 	wswin,
@@ -12,7 +12,8 @@ FROM teams
 WHERE wswin <> 'Y'
 AND yearid >= 1970
 GROUP BY yearid, wswin, name, w
-ORDER BY wins desc;
+ORDER BY wins desc
+LIMIT 1;
 
 --2001 Seattle Mariners, but the above only gave me N values. Now looking adding nulls
 SELECT yearid,
