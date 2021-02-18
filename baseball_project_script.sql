@@ -14,5 +14,3 @@ Group by namefirst, namelast,schoolname
 Order by total_majorleague_salary desc
 --David Price was the highest paid Majorleage player with a salary of $245,553,888
 
-
-
