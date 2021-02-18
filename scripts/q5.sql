@@ -4,7 +4,7 @@
 
 select 
 	'strikeouts' as batting,
-	round(CAST(float8 (sum(so)::float / sum(g)::float) as numeric), 2) as avg_so, left(game_decade::text, 4) || '''s' as decade
+	round(CAST(float8 (sum(so)::float / sum(g)::float) as numeric), 2) as average, left(game_decade::text, 4) || '''s' as decade
 from (
 		select g, so, date_trunc('decade', to_date(yearid || '0101', 'YYYYMMDD')) as game_decade
 		from batting
@@ -13,7 +13,7 @@ group by game_decade
 union all
 select 
 	'homeruns' as batting,
-	round(CAST(float8 (sum(hr)::float / sum(g)::float) as numeric), 2) as avg_hr, left(game_decade::text, 4) || '''s' as decade
+	round(CAST(float8 (sum(hr)::float / sum(g)::float) as numeric), 2) as average, left(game_decade::text, 4) || '''s' as decade
 from (
 		select g, hr, date_trunc('decade', to_date(yearid || '0101', 'YYYYMMDD')) as game_decade
 		from batting
