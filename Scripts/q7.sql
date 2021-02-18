@@ -28,7 +28,7 @@ GROUP BY yearid, wswin, name, w
 ORDER BY wins desc;
 --Still the 2001 Seattle Mariners with 116 wins. 
 
---Select world series winners, order them by ascending wins.
+--Select world series winners, order them by ascending wins,limit to 1.
 SELECT yearid,
 	name, 	
 	wswin,
@@ -37,7 +37,8 @@ FROM teams
 WHERE wswin = 'Y'
 AND yearid >= 1970
 GROUP BY yearid, wswin, name, w
-ORDER BY wins;
+ORDER BY wins
+LIMIT 1;
 /*Lowest wins for world series winener is 1981 LA Dodgers at 63 wins. Why?
 "The 1981 Major League Baseball season had a players' strike, which lasted 
 from June 12 to July 31, 1981, and split the season in two halves. The 
@@ -124,5 +125,6 @@ bigtime AS (SELECT totals.year,
 			FROM totals
 			WHERE totals.max_winner = totals.wswinner)
 SELECT COUNT(bigtime.year) as years_match,
-	COUNT(wsw.year) as total_years
+	COUNT(wsw.year) as total_years, 
+	COUNT(bigtime.year) * 100 / (SELECT COUNT(wsw.year) FROM wsw) as Percentage
 FROM bigtime FULL JOIN wsw ON wsw.year = bigtime.year;
