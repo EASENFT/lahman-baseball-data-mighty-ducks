@@ -1,13 +1,23 @@
--- What range of years for baseball games played does the provided database cover?
--- select max(yearid) - min(yearid), min(yearid) as first_year, max(yearid) as last_year
--- from teams;
-
 -- Find the average number of strikeouts per game by decade since 1920. 
 -- Round the numbers you report to 2 decimal places. 
 -- Do the same for home runs per game. Do you see any trends?
 
--- select *
--- from battingpost
--- -- where playerid = 'abercda01' and yearid = 1871
--- order by yearid desc
--- limit 50;
+select 
+	'strikeouts' as batting,
+	round(CAST(float8 (sum(so)::float / sum(g)::float) as numeric), 2) as avg_so, left(game_decade::text, 4) || '''s' as decade
+from (
+		select g, so, date_trunc('decade', to_date(yearid || '0101', 'YYYYMMDD')) as game_decade
+		from batting
+		where yearid >= 1920 and so <> 0) as decades_of_games
+group by game_decade
+union all
+select 
+	'homeruns' as batting,
+	round(CAST(float8 (sum(hr)::float / sum(g)::float) as numeric), 2) as avg_hr, left(game_decade::text, 4) || '''s' as decade
+from (
+		select g, hr, date_trunc('decade', to_date(yearid || '0101', 'YYYYMMDD')) as game_decade
+		from batting
+		where yearid >= 1920 and hr <> 0) as decades_of_games
+group by game_decade
+order by decade;
+
