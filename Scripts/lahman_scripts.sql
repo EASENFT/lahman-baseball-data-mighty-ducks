@@ -86,29 +86,31 @@ WITH wsw AS (SELECT DISTINCT(yearid) as year,
 			WHERE wswin = 'Y'
 			AND yearid >= 1970
 			GROUP BY yearid, wswin, name, w),
-mw as (SELECT DISTINCT(yearid) as year,
-			 	CASE WHEN w = MAX(w) OVER (PARTITION BY yearid) THEN name END as team,
-			 	MAX(w) OVER (PARTITION BY yearid) as n_mwins
-			FROM teams
-	   		WHERE yearid >= 1970
-	   		AND name IS NOT NULL
-			GROUP BY yearid, w, name
-	  		ORDER BY year)
-SELECT DISTINCT(teams.yearid),
-	MAX(teams.w) OVER(PARTITION BY teams.yearid) as max_wins,
-	mw.team as maxwinner,
-	wsw.name as wswinner, 
-	wsw.wins as wswinner_wins
-FROM teams INNER JOIN wsw ON wsw.year = teams.yearid
-			INNER JOIN mw ON teams.yearid = mw.year
-GROUP BY teams.yearid, teams.w, mw.team, wsw.name, wsw.wins
-ORDER BY teams.yearid;
+ranks AS (SELECT RANK () OVER (PARTITION BY yearid ORDER BY w desc) as wrank,
+		name,
+		w,
+	    yearid
+	  	FROM teams
+	  WHERE yearid >= 1970),
+maxers AS (SELECT yearid,
+		   name, 
+		   wrank, 
+		   ranks.w as wins
+		   FROM ranks
+		   WHERE wrank = 1),
+totals as (SELECT DISTINCT(wsw.year),
+			maxers.name as max_winner,
+			maxers.wins as max_wins,
+			wsw.name as wswinner,
+			wsw.wins as wswinner_wins
+		FROM wsw INNER JOIN maxers ON wsw.year = maxers.yearid)
+SELECT totals.year,
+	totals.wswinner,
+	wswinner_wins
+FROM totals
+WHERE totals.max_winner = totals.wswinner;
 
-/*alternate approach to try: use the CTE for world series info
-and combine it with teams table. do a CASE WHEN for any time 
-MAX(w) = wins for world series team from the wsw table, and only 
-show those rows.*/
-
+--12 years. 25.5% of 47 years. This is the best I could do for a query.
 WITH wsw AS (SELECT DISTINCT(yearid) as year,
 				name, 	
 				wswin,
@@ -134,9 +136,12 @@ totals as (SELECT DISTINCT(wsw.year),
 			maxers.wins as max_wins,
 			wsw.name as wswinner,
 			wsw.wins as wswinner_wins
-		FROM wsw INNER JOIN maxers ON wsw.year = maxers.yearid)
-SELECT totals.year,
-	totals.wswinner,
-	wswinner_wins
-FROM totals
-WHERE totals.max_winner = totals.wswinner;
+		FROM wsw INNER JOIN maxers ON wsw.year = maxers.yearid),
+bigtime AS (SELECT totals.year,
+				totals.wswinner,
+				wswinner_wins
+			FROM totals
+			WHERE totals.max_winner = totals.wswinner)
+SELECT COUNT(bigtime.year) as years_match,
+	COUNT(wsw.year) as total_years
+FROM bigtime FULL JOIN wsw ON wsw.year = bigtime.year;
