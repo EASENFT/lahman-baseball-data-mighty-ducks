@@ -4,21 +4,42 @@ divided by number of games). Only consider parks where there were at least 10 ga
 Report the park name, team name, and average attendance. Repeat for the lowest 5 average
 attendance.*/
 
-
-Select (Sum(hg.attendance)/(count(hg.attendance))) AS avg_attendance, p.park_name, team, count(hg.attendance) as number_of_games
+/*Select (Sum(hg.attendance)/(count(hg.attendance))) AS avg_attendance, p.park_name, team, count(hg.attendance) as number_of_games, year
 From homegames as hg left join parks as p on hg.park =p.park
-Group by p.park, team
-HAVING count(hg.attendance) >10
+Group by p.park, team, span_first, 
+--HAVING count(hg.attendance)
 Order by avg_attendance desc
-Limit 5;
--- pt 1. top 5 teams parks and teams with highest avg attendance 
+Limit 5;*/
 
-SELECT (SUM(hg.attendance)/(COUNT(hg.attendance))) AS avg_attendance, p.park_name, team,
-COUNT(hg.attendance) as number_of_games
-FROM homegames AS hg 
+-- pt 1.realized was going the wrong way starting over  
+
+SELECT p.park_name, hg.park, team, sum(attendance)/games as avg_attendance
+FROM homegames as hg
 LEFT JOIN parks AS p ON hg.park =p.park
-GROUP BY p.park, team
-HAVING COUNT(hg.attendance) >10
-ORDER BY avg_attendance 
-LIMIT 5;
---pt 2. bottom 5 teams with lowest avg attendance 
+Where games >= 10
+and year = 2016
+group by park_name, team, attendance, games, year, hg.park
+order by avg_attendance desc
+Limit 5;
+--q8. think I figured this out? top 5 teams and parks with highest avg attendance 
+
+SELECT p.park_name, hg.park, team, sum(attendance)/games as avg_attendance
+FROM homegames as hg
+LEFT JOIN parks AS p ON hg.park =p.park
+Where games >= 10
+and year = 2016
+group by park_name, team, attendance, games, year, hg.park
+order by avg_attendance 
+Limit 5;
+--q8 bottom 5 avg attendance teams and parks
+
+
+Select team, park, games, attendance, attendance/games
+From homegames
+Where year = 2016
+order by attendance desc
+
+
+
+
+
