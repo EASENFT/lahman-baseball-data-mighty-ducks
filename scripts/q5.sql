@@ -7,7 +7,7 @@ select
 	round(CAST(float8 (sum(so)::float / sum(g)::float) as numeric), 2) as average, left(game_decade::text, 4) || '''s' as decade
 from (
 		select g, so, date_trunc('decade', to_date(yearid || '0101', 'YYYYMMDD')) as game_decade
-		from batting
+		from teams
 		where yearid >= 1920 and so <> 0) as decades_of_games
 group by game_decade
 union all
@@ -16,7 +16,7 @@ select
 	round(CAST(float8 (sum(hr)::float / sum(g)::float) as numeric), 2) as average, left(game_decade::text, 4) || '''s' as decade
 from (
 		select g, hr, date_trunc('decade', to_date(yearid || '0101', 'YYYYMMDD')) as game_decade
-		from batting
+		from teams
 		where yearid >= 1920 and hr <> 0) as decades_of_games
 group by game_decade
 order by decade;
