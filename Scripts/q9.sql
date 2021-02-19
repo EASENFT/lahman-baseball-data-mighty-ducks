@@ -15,7 +15,7 @@ mid AS (SELECT CONCAT(playerid, yearid, teamid) as managerid,
 			yearid,
 			teamid,
 			lgid
-		FROM managers),
+		FROM managers), 
 winner AS (SELECT DISTINCT am.playerid as playerid,
 				CONCAT(people.namefirst, ' ', people.namelast) as name,
 				am.yearid as yearid,
